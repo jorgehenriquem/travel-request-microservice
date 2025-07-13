@@ -35,32 +35,17 @@ docker-compose up -d
 docker-compose exec app composer install
 ```
 
-### 5. Crie a tabela de notificações
-```bash
-docker-compose exec app php artisan notifications:table
-```
-
-### 6. Execute as migrações
+### 5. Execute as migrações
 ```bash
 docker-compose exec app php artisan migrate
 ```
 
-### 5. Gere a chave da aplicação
+### 6. Gere a chave da aplicação
 ```bash
 docker-compose exec app php artisan key:generate
 ```
 
-### 6. Crie a tabela de notificações
-```bash
-docker-compose exec app php artisan notifications:table
-```
-
-### 7. Execute as migrações
-```bash
-docker-compose exec app php artisan migrate
-```
-
-### 8. Gere a chave JWT
+### 7. Gere a chave JWT
 ```bash
 docker-compose exec app php artisan jwt:secret
 ```
