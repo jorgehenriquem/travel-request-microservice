@@ -25,7 +25,6 @@ class CreateTravelRequestRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'applicant_name.required' => 'O nome do solicitante é obrigatório.',
             'destination.required' => 'O destino é obrigatório.',
             'departure_date.required' => 'A data de ida é obrigatória.',
             'departure_date.after' => 'A data de ida deve ser posterior a hoje.',
