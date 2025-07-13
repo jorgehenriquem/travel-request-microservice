@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\TravelRequest;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 
@@ -36,6 +35,7 @@ class TravelRequestService
     {
         $data['user_id'] = auth()->id();
         $data['applicant_name'] = auth()->user()->name;
+        $data['status'] = $data['status'] ?? TravelRequest::STATUS_REQUESTED;
 
         return TravelRequest::create($data);
     }

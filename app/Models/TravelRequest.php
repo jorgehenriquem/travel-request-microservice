@@ -33,6 +33,7 @@ class TravelRequest extends Model
 
     public const STATUS_APPROVED = 'approved';
     public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_REQUESTED = 'requested';
 
     public function user()
     {
@@ -54,12 +55,4 @@ class TravelRequest extends Model
         return $query->where('destination', 'like', "%{$destination}%");
     }
 
-    public function canBeCancelled(): bool
-    {
-        if ($this->status !== 'approved') {
-            return false;
-        }
-
-        return Carbon::parse($this->departure_date)->subDay() > Carbon::now();
-    }
 }
