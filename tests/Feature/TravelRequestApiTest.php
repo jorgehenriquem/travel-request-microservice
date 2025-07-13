@@ -421,7 +421,7 @@ class TravelRequestApiTest extends TestCase
 
         $payload = [
             'status' => TravelRequest::STATUS_CANCELLED,
-            'cancellation_reason' => 'Viagem cancelada por motivos pessoais',//mudar pra sentence
+            'cancellation_reason' => 'Viagem cancelada por motivos pessoais',
         ];
 
         $response = $this->actingAs($this->user, 'api')
