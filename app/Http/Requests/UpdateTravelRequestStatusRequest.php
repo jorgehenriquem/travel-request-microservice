@@ -9,7 +9,17 @@ class UpdateTravelRequestStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->isAdmin();
+        $user = auth()->user();
+        $travelRequest = $this->route('travelRequest');
+
+        return $travelRequest->user_id !== $user->id;
+    }
+
+    public function failedAuthorization()
+    {
+        throw new \Illuminate\Auth\Access\AuthorizationException(
+            'Você não pode alterar o status de uma solicitação criada por você mesmo.'
+        );
     }
 
     public function rules(): array
