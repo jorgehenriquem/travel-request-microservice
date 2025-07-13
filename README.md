@@ -45,14 +45,24 @@ docker-compose exec app php artisan notifications:table
 docker-compose exec app php artisan migrate
 ```
 
-### 7. Gere a chave JWT
-```bash
-docker-compose exec app php artisan jwt:secret
-```
-
-### 7. Gere a chave da aplicação
+### 5. Gere a chave da aplicação
 ```bash
 docker-compose exec app php artisan key:generate
+```
+
+### 6. Crie a tabela de notificações
+```bash
+docker-compose exec app php artisan notifications:table
+```
+
+### 7. Execute as migrações
+```bash
+docker-compose exec app php artisan migrate
+```
+
+### 8. Gere a chave JWT
+```bash
+docker-compose exec app php artisan jwt:secret
 ```
 
 ## 🧪 Testes
