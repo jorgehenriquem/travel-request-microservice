@@ -8,6 +8,7 @@ use App\Services\TravelRequestService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Notification;
 
 class TravelRequestApiTest extends TestCase
 {
@@ -19,6 +20,8 @@ class TravelRequestApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        Notification::fake();
         
         $this->service = new TravelRequestService();
         $this->user = User::factory()->create(['role' => 'admin']);
@@ -407,4 +410,152 @@ class TravelRequestApiTest extends TestCase
         $this->assertEquals(TravelRequest::STATUS_APPROVED, $data[0]['status']);
     }
 
+    public function test_can_cancel_approved_travel_request()
+    {
+        $otherUser = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $otherUser->id,
+            'status' => TravelRequest::STATUS_APPROVED,
+            'approved_at' => now(),
+        ]);
+
+        $payload = [
+            'status' => TravelRequest::STATUS_CANCELLED,
+            'cancellation_reason' => 'Viagem cancelada por motivos pessoais',//mudar pra sentence
+        ];
+
+        $response = $this->actingAs($this->user, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => TravelRequest::STATUS_CANCELLED,
+                'cancellation_reason' => 'Viagem cancelada por motivos pessoais',
+            ]);
+
+        $this->assertDatabaseHas('travel_requests', [
+            'id' => $travelRequest->id,
+            'status' => TravelRequest::STATUS_CANCELLED,
+            'cancellation_reason' => 'Viagem cancelada por motivos pessoais',
+        ]);
+    }
+
+    public function test_can_approve_travel_request()
+    {
+        $otherUser = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $otherUser->id,
+            'status' => TravelRequest::STATUS_REQUESTED,
+        ]);
+
+        $payload = ['status' => TravelRequest::STATUS_APPROVED];
+
+        $response = $this->actingAs($this->user, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => TravelRequest::STATUS_APPROVED,
+            ]);
+
+        $this->assertDatabaseHas('travel_requests', [
+            'id' => $travelRequest->id,
+            'status' => TravelRequest::STATUS_APPROVED,
+        ]);
+    }
+
+    public function test_cancellation_clears_approval_data()
+    {
+
+        $otherUser = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $otherUser->id,
+            'status' => TravelRequest::STATUS_APPROVED,
+            'approved_at' => now(),
+        ]);
+
+        $payload = [
+            'status' => TravelRequest::STATUS_CANCELLED,
+            'cancellation_reason' => 'Motivo do cancelamento',
+        ];
+
+        $response = $this->actingAs($this->user, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('travel_requests', [
+            'id' => $travelRequest->id,
+            'status' => TravelRequest::STATUS_CANCELLED,
+            'cancellation_reason' => 'Motivo do cancelamento',
+        ]);
+
+        $this->assertDatabaseHas('travel_requests', [
+            'id' => $travelRequest->id,
+            'approved_at' => null,
+        ]);
+    }
+
+    public function test_notification_is_sent_when_travel_request_is_approved()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $user->id,
+            'status' => TravelRequest::STATUS_REQUESTED,
+        ]);
+
+        $payload = ['status' => TravelRequest::STATUS_APPROVED];
+
+        $this->actingAs($admin, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        Notification::assertSentTo(
+            [$user],
+            \App\Notifications\TravelRequestStatusUpdated::class
+        );
+    }
+
+    public function test_notification_is_sent_when_travel_request_is_cancelled()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $user->id,
+            'status' => TravelRequest::STATUS_REQUESTED,
+        ]);
+
+        $payload = [
+            'status' => TravelRequest::STATUS_CANCELLED,
+            'cancellation_reason' => fake()->sentence,
+        ];
+
+        $this->actingAs($admin, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        Notification::assertSentTo(
+            [$user],
+            \App\Notifications\TravelRequestStatusUpdated::class
+        );
+    }
+
+    public function test_notification_is_not_sent_when_status_update_fails()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create();
+        $travelRequest = TravelRequest::factory()->create([
+            'user_id' => $user->id,
+            'status' => TravelRequest::STATUS_REQUESTED,
+        ]);
+
+        $payload = ['status' => TravelRequest::STATUS_CANCELLED];
+
+        $this->actingAs($admin, 'api')
+            ->patchJson("/api/travel-requests/{$travelRequest->id}/status", $payload);
+
+        Notification::assertNotSentTo(
+            [$user],
+            \App\Notifications\TravelRequestStatusUpdated::class
+        );
+    }
 }
