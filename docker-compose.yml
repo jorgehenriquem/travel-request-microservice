@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: travel-request-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - travel-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: travel-request-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: travel_requests
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - travel-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: travel-request-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - travel-network
+
+networks:
+  travel-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
