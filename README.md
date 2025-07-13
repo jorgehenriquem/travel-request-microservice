@@ -1,87 +1,148 @@
 # Travel Request Microservice
 
-Microsserviço em Laravel para gerenciamento de pedidos de viagem corporativa.
 
-## Características
+## 🚀 Tecnologias
 
-- API REST completa para gerenciamento de pedidos
-- Autenticação JWT
-- Sistema de notificações
-- Validação de dados robusta
-- Testes automatizados
-- Containerização com Docker
+- **Laravel 11**
+- **PHP 8.2+** 
+- **Docker & Docker Compose** 
+- **JWT Authentication**
+- **PHPUnit**
 
-## Instalação
+## 📋 Pré-requisitos
 
-1. Clone o repositório
-2. Execute `docker-compose up -d --build`
-3. Execute `docker-compose exec app php artisan migrate`
-4. Execute `docker-compose exec app php artisan jwt:secret`
-5. Acesse `http://localhost:8000`
+- Docker
+- Docker Compose
+- Git
 
-## Endpoints
+## 🛠️ Instalação
+
+### 1. Clone o repositório
+
+
+### 2. Configure as variáveis de ambiente
+```bash
+cp .env.example .env
+```
+
+### 3. Execute com Docker
+```bash
+docker-compose up -d
+```
+
+### 4. Instale as dependências
+```bash
+docker-compose exec app composer install
+```
+
+### 5. Execute as migrações
+```bash
+docker-compose exec app php artisan migrate
+```
+
+### 6. Gere a chave JWT
+```bash
+docker-compose exec app php artisan jwt:secret
+```
+
+### 7. Gere a chave da aplicação
+```bash
+docker-compose exec app php artisan key:generate
+```
+
+## 🧪 Testes
+
+### Executar todos os testes
+```bash
+docker-compose exec app php artisan test
+```
+
+
+### Executar testes específicos
+```bash
+docker-compose exec app php artisan test --filter=TravelRequestApiTest
+```
+
+## 📡 Endpoints da API
 
 ### Autenticação
-- POST /api/auth/register
-- POST /api/auth/login
-- POST /api/auth/logout
-- GET /api/auth/me
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `POST` | `/api/auth/register` | Registrar novo usuário |
+| `POST` | `/api/auth/login` | Fazer login |
+| `POST` | `/api/auth/logout` | Fazer logout |
+| `GET` | `/api/auth/me` | Obter informações do usuário |
 
-### Pedidos de Viagem
-- GET /api/travel-requests
-- POST /api/travel-requests
-- GET /api/travel-requests/{id}
-- PUT/PATCH /api/travel-requests/{id}
-- DELETE /api/travel-requests/{id}
-- PATCH /api/travel-requests/{id}/status (admin only)
-- PATCH /api/travel-requests/{id}/cancel
+### Solicitações de Viagem
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/api/travel-requests` | Listar solicitações (com filtros) |
+| `POST` | `/api/travel-requests` | Criar nova solicitação |
+| `GET` | `/api/travel-requests/{id}` | Ver solicitação específica |
+| `PATCH` | `/api/travel-requests/{id}/status` | Atualizar status da solicitação |
 
-## Uso da API
+### Filtros Disponíveis
+- `status` - Filtrar por status (requested, approved, cancelled)
+- `destination` - Filtrar por destino
+- `start_date` - Data inicial do período
+- `end_date` - Data final do período
 
-### Registro de Usuário
+## 🔐 Autenticação
+
+A API usa JWT (JSON Web Tokens) para autenticação.
+
+### Exemplo de uso:
 ```bash
-POST /api/auth/register
-{
-  "name": "João Silva",
-  "email": "joao@example.com",
-  "password": "12345678",
-  "role": "admin"  # opcional, padrão: "user"
-}
+# Login
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password"}'
+
+# Usar token em requisições
+curl -X GET http://localhost:8000/api/travel-requests \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
 ```
 
-### Login
+## 📊 Funcionalidades
+
+### Solicitações de Viagem
+- ✅ Criar solicitação de viagem
+- ✅ Listar solicitações com filtros
+- ✅ Consultar solicitação por ID
+- ✅ Atualizar status (aprovado/cancelado)
+- ✅ Validações de dados
+- ✅ Autorização baseada em roles
+
+### Notificações
+- ✅ Notificação automática ao aprovar solicitação
+- ✅ Notificação automática ao cancelar solicitação
+
+### Testes
+- ✅ Testes de criação de solicitações
+- ✅ Testes de validação
+- ✅ Testes de autorização
+- ✅ Testes de filtros
+- ✅ Testes de notificações
+
+## 🐳 Docker
+
+### Comandos úteis
 ```bash
-POST /api/auth/login
-{
-  "email": "joao@example.com",
-  "password": "12345678"
-}
+# Ver logs
+docker-compose logs -f app
+
+# Acessar container
+docker-compose exec app bash
+
+# Parar containers
+docker-compose down
+
+# Rebuild containers
+docker-compose up -d --build
 ```
 
-### Criar Solicitação de Viagem
-```bash
-POST /api/travel-requests
-Authorization: Bearer SEU_TOKEN
-{
-  "applicant_name": "João Silva",
-  "destination": "São Paulo",
-  "departure_date": "2025-08-15",
-  "return_date": "2025-08-20",
-  "reason": "Reunião com cliente"
-}
-```
 
-## Testes
 
-Execute `docker-compose exec app php artisan test`
+## 📝 Licença
 
-## Tecnologias
-
-- Laravel 11
-- PHP 8.2
-- MySQL 8.0
-- Redis
-- Docker
-- JWT Auth (Tymon)
-- PHPUnit
-- Apache
+Este projeto está sob a licença MIT.
