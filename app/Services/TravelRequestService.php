@@ -42,15 +42,25 @@ class TravelRequestService
 
     public function updateStatus(TravelRequest $travelRequest, array $data): TravelRequest
     {
+        $status = $data['status'];
         $updateData = [
-            'status' => $data['status'],
+            'status' => $status,
         ];
 
-        if ($data['status'] === 'approved') {
-            $updateData['approved_at'] = Carbon::now();
-        } elseif ($data['status'] === 'cancelled') {
-            $updateData['cancelled_at'] = Carbon::now();
-            $updateData['cancellation_reason'] = $data['cancellation_reason'];
+        switch ($status) {
+            case TravelRequest::STATUS_APPROVED:
+            case 'approved':
+                $updateData['approved_at'] = Carbon::now();
+                $updateData['cancelled_at'] = null;
+                $updateData['cancellation_reason'] = null;
+                break;
+
+            case TravelRequest::STATUS_CANCELLED:
+            case 'cancelled':
+                $updateData['cancelled_at'] = Carbon::now();
+                $updateData['cancellation_reason'] = $data['cancellation_reason'] ?? null;
+                $updateData['approved_at'] = null;
+                break;
         }
 
         $travelRequest->update($updateData);

@@ -31,6 +31,9 @@ class TravelRequest extends Model
         'cancelled_at' => 'datetime',
     ];
 
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_CANCELLED = 'cancelled';
+
     public function user()
     {
         return $this->belongsTo(User::class);
