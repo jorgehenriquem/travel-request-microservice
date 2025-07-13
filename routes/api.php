@@ -19,5 +19,4 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('travel-requests/{travelRequest}/status', [TravelRequestController::class, 'updateStatus'])
         ->middleware('admin');
     
-    Route::patch('travel-requests/{travelRequest}/cancel', [TravelRequestController::class, 'cancel']);
 });

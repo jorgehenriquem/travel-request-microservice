@@ -68,14 +68,4 @@ class TravelRequestService
         return $travelRequest->fresh();
     }
 
-    public function cancelRequest(TravelRequest $travelRequest): TravelRequest
-    {
-        $travelRequest->update([
-            'status' => 'cancelled',
-            'cancelled_at' => Carbon::now(),
-            'cancellation_reason' => 'Cancelado pelo usuário após aprovação'
-        ]);
-
-        return $travelRequest->fresh();
-    }
 }

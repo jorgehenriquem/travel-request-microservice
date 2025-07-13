@@ -63,18 +63,4 @@ class TravelRequestController extends Controller
         return response()->json($updatedRequest);
     }
 
-    public function cancel(TravelRequest $travelRequest): JsonResponse
-    {
-        $this->authorize('cancel', $travelRequest);
-
-        if (!$travelRequest->canBeCancelled()) {
-            return response()->json([
-                'error' => 'Este pedido não pode ser cancelado.'
-            ], 422);
-        }
-
-        $updatedRequest = $this->travelRequestService->cancelRequest($travelRequest);
-
-        return response()->json($updatedRequest);
-    }
 }
