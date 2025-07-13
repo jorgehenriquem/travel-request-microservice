@@ -28,25 +28,26 @@ class TravelRequestApiTest extends TestCase
     public function test_can_create_travel_request()
     {
         $data = [
-            'destination' => 'Rio de Janeiro',
-            'departure_date' => '2024-03-15',
-            'return_date' => '2024-03-20',
-            'reason' => 'Conferência'
+            'destination' => fake()->city,
+            'departure_date' => now()->addDays(rand(2, 10))->toDateString(),
+            'return_date' => now()->addDays(rand(11, 20))->toDateString(),
+            'reason' => fake()->sentence,
         ];
 
         $travelRequest = $this->service->createRequest($data);
 
         $this->assertInstanceOf(TravelRequest::class, $travelRequest);
         $this->assertEquals($this->user->id, $travelRequest->user_id);
-        $this->assertEquals('Rio de Janeiro', $travelRequest->destination);
+        $this->assertEquals($data['destination'], $travelRequest->destination);
         $this->assertEquals('requested', $travelRequest->status);
     }
+
     public function test_destination_is_required()
     {
         $data = [
-            'departure_date' => now()->addDays(2)->toDateString(),
-            'return_date' => now()->addDays(3)->toDateString(),
-            'reason' => 'Viagem de teste'
+            'departure_date' => now()->addDays(rand(2, 10))->toDateString(),
+            'return_date' => now()->addDays(rand(11, 20))->toDateString(),
+            'reason' => fake()->sentence,
         ];
 
         $response = $this->actingAs($this->user, 'api')
@@ -55,12 +56,13 @@ class TravelRequestApiTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['destination']);
     }
+
     public function test_departure_date_is_required_and_after_today()
     {
         $data = [
-            'destination' => 'Rio de Janeiro',
-            'return_date' => now()->addDays(3)->toDateString(),
-            'reason' => 'Viagem de teste'
+            'destination' => fake()->city,
+            'return_date' => now()->addDays(rand(11, 20))->toDateString(),
+            'reason' => fake()->sentence,
         ];
 
         $response = $this->actingAs($this->user, 'api')
@@ -76,12 +78,13 @@ class TravelRequestApiTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['departure_date']);
     }
+
     public function test_return_date_is_required_and_after_departure_date()
     {
         $data = [
-            'destination' => 'Rio de Janeiro',
-            'departure_date' => now()->addDays(2)->toDateString(),
-            'reason' => 'Viagem de teste'
+            'destination' => fake()->city,
+            'departure_date' => now()->addDays(rand(2, 10))->toDateString(),
+            'reason' => fake()->sentence,
         ];
 
         $response = $this->actingAs($this->user, 'api')
