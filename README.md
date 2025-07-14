@@ -37,6 +37,7 @@ docker-compose exec app composer install
 
 ### 5. Execute as migrações
 ```bash
+docker-compose exec app php artisan notifications:table
 docker-compose exec app php artisan migrate
 ```
 
